@@ -15,8 +15,7 @@ class GaussianElimination:
 			self.dim1 = equations # rows
 		self.dim2 = unknowns + 1 # columns
 
-		#self.abc = "abcdefghijklmnopqrstuvwxyz"
-
+		# coefficents in form ax + by + cz = d -> [a, b, c, d]
 		self.matrix = \
 		[
 			[0.5, 1, 1, 128],
@@ -24,12 +23,7 @@ class GaussianElimination:
 			[4.5, 3, 1, 0]
 
 		]
-		'''self.matrix = \
-                [
-                        [3,-1,9],
-                        [1,-2,-2]
-                ]'''
-		#self.parseEquation()
+		#self.parseEquation() # alternative way of inputing the coefficents
 		try:
 			self.gaussElimate()
 		except ValueError:
@@ -133,7 +127,7 @@ class GaussianElimination:
 
 		
 
-GaussianElimination(3)
+GaussianElimination(3) # use to run, 3 meaning there are 3 unknowns
 
 
 
