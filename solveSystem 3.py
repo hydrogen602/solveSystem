@@ -1,9 +1,8 @@
-
+#!/usr/bin/env python3.6
+# This version uses 8byte numpy floats which increases precision
 #
-# so elimination?
-# 
-# matrix based approach
-#
+import numpy as np
+import time
 
 class GaussianElimination:
 
@@ -14,53 +13,31 @@ class GaussianElimination:
 		else:
 			self.dim1 = equations # rows
 		self.dim2 = unknowns + 1 # columns
-
-		# coefficents in form ax + by + cz = d -> [a, b, c, d]
-		self.matrix = \
-		[
-			[0.5, 1, 1, 128],
-			[2, 2, 1, 80],
-			[4.5, 3, 1, 0]
-
-		]
-		#self.parseEquation() # alternative way of inputing the coefficents
+		self.matrix = []
+		self.parseEquation()
+		self.t = time.time()
 		try:
 			self.gaussElimate()
 		except ValueError:
 			pass
-		#print(self)
 
 	def __repr__(self):
-		s = ""
-		for row in self.matrix:
-			for i in range(len(row)):
-				if len(str(row[i])) > 5:
-					row[i] = float(str(row[i])[:6])
-				if i != len(row) - 1:
-					s += "{0}\t".format(row[i])
-				else:
-					s += ": {0}\n".format(row[i])
-
-		return s
+		return " " + str(self.matrix)[1:-1]
 
 	def parseEquation(self):
+		self.dim1 = int(input("Number of equations: "))
+		self.dim2 = int(input("Number of variables: ")) + 1
+		self.matrix = np.zeros((self.dim1,self.dim2),dtype=np.float64)
 		print("Example: 1x + 0y + -2z = 3 -> 1 0 -2 : 3")
 		for i in range(self.dim1):
-			tmp = [0 for j in range(self.dim2)]
 			s1 = input("Equation {0} => ".format(i+1))
 			assert ":" in s1
-			s2 = s1.split(":")
-			s2 = [j.strip() for j in s2]
-
+			s2 = [j.strip() for j in s1.split(":")]
 			s3 = s2[0].split(" ")
 			s3.append(s2[1])
-			#s3 = [j.strip() for j in s3]
 
-			#print(s3)
-			for j in range(self.dim2):
-				tmp[j] = int(s3[j])
-
-			self.matrix.append(tmp)
+			tmp = [int(s3[j]) for j in range(self.dim2)]
+			self.matrix[i] = tmp
 
 	def getFirstNotZeroCoeff(self,row):
 		for i in self.matrix[row][:-1]: # last value in the matrix row is the constant
@@ -79,18 +56,19 @@ class GaussianElimination:
 				return row
 
 	def matrixSwitch(self,a,b):
+		print("Switching R{0} <--> R{1}".format(a+1,b+1))
 		tmp = self.matrix[a]
 		self.matrix[a] = self.matrix[b]
 		self.matrix[b] = tmp
 
 	def matrixDivide(self,row,divisor):
-		self.matrix[row] = [value / divisor for value in self.matrix[row]]
+		print("Dividing R{0} by {1}".format(row+1,divisor))
+		self.matrix[row] = self.matrix[row] / divisor
 
 	def matrixAdd(self, column, row):
 		coeff = self.matrix[row][column]
-		tmp = [i * -coeff for i in self.matrix[column]]
-		self.matrix[row] = [i + j for i, j in zip(self.matrix[row],tmp)]
-		# check for inf / no solution
+		print("Adding ({0})R{1} to R{2}".format(-coeff,column+1,row+1))
+		self.matrix[row] = self.matrix[row] + (-coeff * self.matrix[column])
 
 	def cleanup(self):
 		for row in range(self.dim1):
@@ -102,17 +80,17 @@ class GaussianElimination:
 		# Gaussion elimination to obtain row-echelon form
 		for columnNum in range(self.dim2 - 1):
 			row = self.getFirstNotZeroFirstCoeffRow()
-			print("Switching rows\n" + repr(self))
 			if row != 0:
 				self.matrixSwitch(columnNum, row)
+				print(repr(self))
 			coeff = self.getFirstNotZeroCoeff(columnNum)
 			self.matrixDivide(columnNum, coeff)
 			self.cleanup()
-			print("Dividing rows\n" + repr(self))
+			print(repr(self))
 			for rowNum in range(columnNum + 1, self.dim1):
 				if self.matrix[rowNum][columnNum] != 0:
 					self.matrixAdd(columnNum,rowNum)
-					print("Adding rows\n" + repr(self))
+					print(repr(self))
 					self.getFirstNotZeroCoeff(rowNum)
 		print("Achieved row-echelon form")
 		# Gauss-Jordan elimination to obtain the solution
@@ -120,17 +98,3 @@ class GaussianElimination:
 			for rowNum in range(0,columnNum):
 				self.matrixAdd(columnNum, rowNum)
 				print(self)
-
-
-
-
-
-		
-
-GaussianElimination(3) # use to run, 3 meaning there are 3 unknowns
-
-
-
-
-
-
